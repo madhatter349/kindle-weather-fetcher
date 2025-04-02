@@ -1,5 +1,7 @@
 import asyncio
 from playwright.async_api import async_playwright
+from PIL import Image
+import io
 
 URL = "https://kindle.hrincar.eu/weather/index.html?city=&lat=40.785027&lon=-73.974510&utcOffset=&lang=en&rotation=none&units=imperial&tempType=actual&night=off&appId="
 OUTPUT_FILE = "weather.png"
@@ -11,9 +13,18 @@ async def capture_kindle_image():
         page = await browser.new_page()
         await page.set_viewport_size(VIEWPORT)
         await page.goto(URL, wait_until="networkidle")
-        await page.screenshot(path=OUTPUT_FILE)
+
+        # Capture screenshot as bytes
+        screenshot_bytes = await page.screenshot(type="png")
         await browser.close()
-        print(f"Screenshot saved to {OUTPUT_FILE}")
+
+        # Convert to 1-bit BW for Kindle using Pillow
+        img = Image.open(io.BytesIO(screenshot_bytes))
+        img = img.convert("L")  # convert to grayscale
+        img = img.convert("1")  # convert to 1-bit BW with dithering
+        img.save(OUTPUT_FILE)
+
+        print(f"Kindle-optimized screenshot saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(capture_kindle_image())
