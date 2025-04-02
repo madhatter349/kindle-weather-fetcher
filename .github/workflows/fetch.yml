@@ -1,9 +1,9 @@
-name: Fetch Weather Image
+name: Fetch Weather Screenshot
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Runs every 30 minutes (UTC)
-  workflow_dispatch:         # Allows manual trigger via GitHub UI
+    - cron: "*/30 * * * *"  # Every 30 minutes (UTC)
+  workflow_dispatch:        # Manual trigger option
 
 jobs:
   fetch:
@@ -19,15 +19,17 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          pip install playwright
+          playwright install --with-deps
 
-      - name: Fetch weather image
+      - name: Run script
         run: python fetch_weather_image.py
 
-      - name: Commit and push if changed
+      - name: Commit and push updated image
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add weather.png
-          git commit -m "Update weather image" || echo "No changes to commit"
+          git commit -m "Update weather screenshot" || echo "No changes"
           git push
