@@ -1,0 +1,33 @@
+name: Fetch Weather Image
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 minutes
+  workflow_dispatch:       # allow manual runs
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run fetch script
+        run: python fetch_weather_image.py
+
+      - name: Commit and push updated image
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add weather.png
+          git commit -m "Update weather image" || echo "No changes to commit"
+          git push
