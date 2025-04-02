@@ -2,15 +2,15 @@ name: Fetch Weather Image
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # every 30 minutes
-  workflow_dispatch:       # allow manual runs
+    - cron: "*/30 * * * *"  # Runs every 30 minutes (UTC)
+  workflow_dispatch:         # Allows manual trigger via GitHub UI
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -21,10 +21,10 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run fetch script
+      - name: Fetch weather image
         run: python fetch_weather_image.py
 
-      - name: Commit and push updated image
+      - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
