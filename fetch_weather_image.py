@@ -5,7 +5,9 @@ import io
 
 URL = "https://kindle.hrincar.eu/weather/index.html?city=&lat=40.785027&lon=-73.974510&utcOffset=&lang=en&rotation=none&units=imperial&tempType=actual&night=off&appId="
 OUTPUT_FILE = "weather.png"
-VIEWPORT = {"width": 800, "height": 600}
+VIEWPORT = {"width": 800, "height": 600}  # You can leave this or adjust for initial screenshot quality
+
+TARGET_SIZE = (1072, 1448)  # Width x Height for Kindle
 
 async def capture_kindle_image():
     async with async_playwright() as p:
@@ -18,12 +20,14 @@ async def capture_kindle_image():
         screenshot_bytes = await page.screenshot(type="png")
         await browser.close()
 
-        # Convert to 1-bit BW for Kindle using Pillow
+        # Convert and resize with Pillow
         img = Image.open(io.BytesIO(screenshot_bytes))
-        img = img.convert("L")  # convert to grayscale
-        img = img.convert("1")  # convert to 1-bit BW with dithering
-        img.save(OUTPUT_FILE)
+        img = img.convert("L")  # grayscale
+        img = img.rotate(90, expand=True)  # rotate 90 degrees clockwise
+        img = img.resize(TARGET_SIZE)  # resize to target dimensions
+        img = img.convert("1")  # convert to 1-bit BW
 
+        img.save(OUTPUT_FILE)
         print(f"Kindle-optimized screenshot saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
